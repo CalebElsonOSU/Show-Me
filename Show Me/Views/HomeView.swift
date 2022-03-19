@@ -79,7 +79,6 @@ struct HomeView: View {
         if !FileManager.default.fileExists(atPath: driveURL!.path, isDirectory: nil) {
             do {
                 try FileManager.default.createDirectory(at: driveURL!, withIntermediateDirectories: true, attributes: nil)
-                print("success?")
             }
             catch {
                 print(error.localizedDescription)

@@ -27,6 +27,7 @@ struct GameOverView: View {
                 Text("Return to main menu")
             })
         }
+        .padding()
     }
 }
 

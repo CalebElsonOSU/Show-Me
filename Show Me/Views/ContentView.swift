@@ -120,20 +120,22 @@ struct ContentView : View {
                 model.showAnswer8.send()
             }
             
-            answerFound()
+            answerFound(score: currentGame.currentAnswers[index].score)
         }
     }
     
-    func answerFound() {
-        currentGame.currentScore += 1
-        if currentGame.currentScore == currentGame.currentAnswers.count {
+    func answerFound(score: Int) {
+        currentGame.currentAnswered += 1
+        currentGame.currentScore += score
+        
+        if currentGame.currentAnswered == currentGame.currentAnswers.count {
             currentGame.resetCurrentScore()
             
             if currentGame.isLastGame() {
                 showGameOver = true
+            } else {
+                model.resetGame.send()
             }
-            
-            model.resetGame.send()
         }
     }
 }

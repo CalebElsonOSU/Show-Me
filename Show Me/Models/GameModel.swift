@@ -15,11 +15,13 @@ class GameModel {
     var currentAnswers: [(answer: String, score: Int)]
     var gameScore: Int
     var currentScore: Int
+    var currentAnswered: Int
     
     init(gameData: [GameData]) {
         self.gameCounter = 0
         self.gameScore = 0
         self.currentScore = 0
+        self.currentAnswered = 0
         self.allGames = gameData
         self.currentGame = self.allGames[self.gameCounter]
         self.currentQuestion = self.currentGame.question.original

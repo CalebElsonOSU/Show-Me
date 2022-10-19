@@ -171,6 +171,8 @@ struct ARViewContainer: UIViewRepresentable {
         // Add the box anchor to the scene
         arView.scene.anchors.append(boxAnchor)
         
+        initiateGame(experience: boxAnchor)
+        
         // MARK: - Combine triggers
         // TODO: Create timer/timer interactions
         model.showTimer.sink {
@@ -183,49 +185,50 @@ struct ARViewContainer: UIViewRepresentable {
         
         model.showAnswer1.sink {
             let answerAndScore = currentGame.currentAnswers[0]
-            updateAnswerAndScore(answerBox: boxAnchor.answer1!, scoreBox: boxAnchor.score1!, answer: answerAndScore.answer, score: answerAndScore.score)
+            updateAnswerAndScore(answerBox: boxAnchor.answer1!, scoreBox: boxAnchor.score1!, answer: answerAndScore.answer, score: answerAndScore.score, scoreBoard: boxAnchor.currentScore!
+                                 , totalScore: answerAndScore.score + currentGame.currentScore)
             boxAnchor.notifications.showMe1.post()
         }.store(in: &context.coordinator.subscriptions)
         
         model.showAnswer2.sink {
             let answerAndScore = currentGame.currentAnswers[1]
-            updateAnswerAndScore(answerBox: boxAnchor.answer2!, scoreBox: boxAnchor.score2!, answer: answerAndScore.answer, score: answerAndScore.score)
+            updateAnswerAndScore(answerBox: boxAnchor.answer2!, scoreBox: boxAnchor.score2!, answer: answerAndScore.answer, score: answerAndScore.score, scoreBoard: boxAnchor.currentScore!, totalScore: answerAndScore.score + currentGame.currentScore)
             boxAnchor.notifications.showMe2.post()
         }.store(in: &context.coordinator.subscriptions)
         
         model.showAnswer3.sink {
             let answerAndScore = currentGame.currentAnswers[2]
-            updateAnswerAndScore(answerBox: boxAnchor.answer3!, scoreBox: boxAnchor.score3!, answer: answerAndScore.answer, score: answerAndScore.score)
+            updateAnswerAndScore(answerBox: boxAnchor.answer3!, scoreBox: boxAnchor.score3!, answer: answerAndScore.answer, score: answerAndScore.score, scoreBoard: boxAnchor.currentScore!, totalScore: answerAndScore.score + currentGame.currentScore)
             boxAnchor.notifications.showMe3.post()
         }.store(in: &context.coordinator.subscriptions)
         
         model.showAnswer4.sink {
             let answerAndScore = currentGame.currentAnswers[3]
-            updateAnswerAndScore(answerBox: boxAnchor.answer4!, scoreBox: boxAnchor.score4!, answer: answerAndScore.answer, score: answerAndScore.score)
+            updateAnswerAndScore(answerBox: boxAnchor.answer4!, scoreBox: boxAnchor.score4!, answer: answerAndScore.answer, score: answerAndScore.score, scoreBoard: boxAnchor.currentScore!, totalScore: answerAndScore.score + currentGame.currentScore)
             boxAnchor.notifications.showMe4.post()
         }.store(in: &context.coordinator.subscriptions)
         
         model.showAnswer5.sink {
             let answerAndScore = currentGame.currentAnswers[4]
-            updateAnswerAndScore(answerBox: boxAnchor.answer5!, scoreBox: boxAnchor.score5!, answer: answerAndScore.answer, score: answerAndScore.score)
+            updateAnswerAndScore(answerBox: boxAnchor.answer5!, scoreBox: boxAnchor.score5!, answer: answerAndScore.answer, score: answerAndScore.score, scoreBoard: boxAnchor.currentScore!, totalScore: answerAndScore.score + currentGame.currentScore)
             boxAnchor.notifications.showMe5.post()
         }.store(in: &context.coordinator.subscriptions)
         
         model.showAnswer6.sink {
             let answerAndScore = currentGame.currentAnswers[5]
-            updateAnswerAndScore(answerBox: boxAnchor.answer6!, scoreBox: boxAnchor.score6!, answer: answerAndScore.answer, score: answerAndScore.score)
+            updateAnswerAndScore(answerBox: boxAnchor.answer6!, scoreBox: boxAnchor.score6!, answer: answerAndScore.answer, score: answerAndScore.score, scoreBoard: boxAnchor.currentScore!, totalScore: answerAndScore.score + currentGame.currentScore)
             boxAnchor.notifications.showMe6.post()
         }.store(in: &context.coordinator.subscriptions)
         
         model.showAnswer7.sink {
             let answerAndScore = currentGame.currentAnswers[6]
-            updateAnswerAndScore(answerBox: boxAnchor.answer7!, scoreBox: boxAnchor.score7!, answer: answerAndScore.answer, score: answerAndScore.score)
+            updateAnswerAndScore(answerBox: boxAnchor.answer7!, scoreBox: boxAnchor.score7!, answer: answerAndScore.answer, score: answerAndScore.score, scoreBoard: boxAnchor.currentScore!, totalScore: answerAndScore.score + currentGame.currentScore)
             boxAnchor.notifications.showMe7.post()
         }.store(in: &context.coordinator.subscriptions)
         
         model.showAnswer8.sink {
             let answerAndScore = currentGame.currentAnswers[7]
-            updateAnswerAndScore(answerBox: boxAnchor.answer8!, scoreBox: boxAnchor.score8!, answer: answerAndScore.answer, score: answerAndScore.score)
+            updateAnswerAndScore(answerBox: boxAnchor.answer8!, scoreBox: boxAnchor.score8!, answer: answerAndScore.answer, score: answerAndScore.score, scoreBoard: boxAnchor.currentScore!, totalScore: answerAndScore.score + currentGame.currentScore)
             boxAnchor.notifications.showMe8.post()
         }.store(in: &context.coordinator.subscriptions)
         
@@ -243,7 +246,7 @@ struct ARViewContainer: UIViewRepresentable {
     // MARK: - UI update methods
     func updateUIView(_ uiView: ARView, context: Context) {}
     
-    func updateAnswerAndScore(answerBox: Entity, scoreBox: Entity, answer: String, score: Int) {
+    func updateAnswerAndScore(answerBox: Entity, scoreBox: Entity, answer: String, score: Int, scoreBoard: Entity, totalScore: Int) {
         answerBox.children[3].children[0].children[0].components.removeAll()
         answerBox.children[3].children[0].children[0].children.removeAll()
         answerBox.children[3].children[0].children[0].addChild(TextEntity(text: answer, color: .white, isMetallic: false))
@@ -251,8 +254,11 @@ struct ARViewContainer: UIViewRepresentable {
         scoreBox.children[3].children[0].children[0].components.removeAll()
         scoreBox.children[3].children[0].children[0].children.removeAll()
         scoreBox.children[3].children[0].children[0].addChild(TextEntity(text: String(score), color: .white, isMetallic: false))
+        
+        scoreBoard.children[3].children[0].children[0].components.removeAll()
+        scoreBoard.children[3].children[0].children[0].children.removeAll()
+        scoreBoard.children[3].children[0].children[0].addChild(TextEntity(text: String(totalScore), color: .white, isMetallic: false))
     }
-    
     
     func updateBoardsData(experience: Experience.Box) {
         let boards = [experience.board1!, experience.board2!, experience.board3!, experience.board4!, experience.board5!, experience.board6!, experience.board7!, experience.board8!]
@@ -270,6 +276,18 @@ struct ARViewContainer: UIViewRepresentable {
                 board.children[3].children[0].children[0].components.removeAll()
             }
         }
+    }
+    
+    // Called once at the start of the game
+    // Initiates currentScoreText and sets currentScore to 0
+    func initiateGame(experience: Experience.Box) {
+        experience.currentScoreText?.children[3].children[0].children[0].components.removeAll()
+        experience.currentScoreText?.children[3].children[0].children[0].children.removeAll()
+        experience.currentScoreText?.children[3].children[0].children[0].addChild(TextEntity(text: "Current Score:", color: .white, isMetallic: false, alignment: .left))
+        
+        experience.currentScore?.children[3].children[0].children[0].components.removeAll()
+        experience.currentScore?.children[3].children[0].children[0].children.removeAll()
+        experience.currentScore?.children[3].children[0].children[0].addChild(TextEntity(text: "0", color: .white, isMetallic: false))
     }
     
     class Coordinator: NSObject {

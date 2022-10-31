@@ -73,46 +73,17 @@ struct HomeView: View {
     
     // MARK: - Pull and parse JSON
     func getData() {
-        let driveURL = FileManager.default.url(forUbiquityContainerIdentifier: nil)?.appendingPathComponent("Documents")
-        
-        // Create folder if it doesn't exist
-        if !FileManager.default.fileExists(atPath: driveURL!.path, isDirectory: nil) {
-            do {
-                try FileManager.default.createDirectory(at: driveURL!, withIntermediateDirectories: true, attributes: nil)
-            }
-            catch {
-                print(error.localizedDescription)
-            }
-        }
-        
-        let fileURL = driveURL!.appendingPathComponent("io.json")
-        let data = try? Data(contentsOf: fileURL)
-        
-        // Reset data to get a new currentGame
-        if self.currentGame != nil {
-            self.currentGame = nil
-            do {
-                try String(Int(numberOfRounds)).write(to: fileURL, atomically: true, encoding: .utf8)
-            }
-            catch {
-                print(error.localizedDescription)
-            }
-        }
-        
-        // If JSON decode fails, write number to file
-        guard let gameData = try? JSONDecoder().decode([GameData].self, from: data!) else {
-            do {
-                try String(Int(numberOfRounds)).write(to: fileURL, atomically: true, encoding: .utf8)
-            }
-            catch {
-                print(error.localizedDescription)
-            }
-            
+        guard let path = Bundle.main.path(forResource: "dev.scraped", ofType: "json") else {
+            print("json not found")
             return
         }
+        print("path, ", path, path.count)
+        let data = try! Data(contentsOf: URL(fileURLWithPath: path), options: .mappedIfSafe)
+        let result = try! JSONDecoder().decode([GameData].self, from: data)
         
         // Parse JSON, create currentGame object
-        self.currentGame = GameModel(gameData: gameData)
+        self.currentGame = GameModel(gameData: result)
+        
     }
 }
 

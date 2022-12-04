@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C9362B3A291A77E300163A95 /* SpeechRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9362B39291A77E300163A95 /* SpeechRecognizer.swift */; };
+		C9362B3C291A850800163A95 /* LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = C9362B3B291A850800163A95 /* LICENSE.txt */; };
 		C93DC80227CFFC1100DEB339 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C93DC80127CFFC1100DEB339 /* AppDelegate.swift */; };
 		C93DC80427CFFC1100DEB339 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C93DC80327CFFC1100DEB339 /* ContentView.swift */; };
 		C93DC80827CFFC1200DEB339 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C93DC80727CFFC1200DEB339 /* Assets.xcassets */; };
@@ -23,6 +25,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		C9362B39291A77E300163A95 /* SpeechRecognizer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpeechRecognizer.swift; sourceTree = "<group>"; };
+		C9362B3B291A850800163A95 /* LICENSE.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
 		C93DC7FE27CFFC1100DEB339 /* Show Me.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Show Me.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C93DC80127CFFC1100DEB339 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		C93DC80327CFFC1100DEB339 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -100,6 +104,8 @@
 				C93DC81127CFFC2100DEB339 /* GameData.swift */,
 				C9E99CCC27E006C0008E7F0D /* GameModel.swift */,
 				C9781BB9290E7F8500A6FC1B /* dev.scraped.json */,
+				C9362B39291A77E300163A95 /* SpeechRecognizer.swift */,
+				C9362B3B291A850800163A95 /* LICENSE.txt */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -179,6 +185,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C9362B3C291A850800163A95 /* LICENSE.txt in Resources */,
 				C93DC80B27CFFC1200DEB339 /* Preview Assets.xcassets in Resources */,
 				C93DC80827CFFC1200DEB339 /* Assets.xcassets in Resources */,
 				C9781BBA290E7F8600A6FC1B /* dev.scraped.json in Resources */,
@@ -197,6 +204,7 @@
 				C93DC81227CFFC2100DEB339 /* GameData.swift in Sources */,
 				C9E99CCD27E006C0008E7F0D /* GameModel.swift in Sources */,
 				C93DC80227CFFC1100DEB339 /* AppDelegate.swift in Sources */,
+				C9362B3A291A77E300163A95 /* SpeechRecognizer.swift in Sources */,
 				C93DC81C27CFFF2E00DEB339 /* HelpView.swift in Sources */,
 				C93DC81427CFFC3100DEB339 /* HomeView.swift in Sources */,
 				C93DC81827CFFC8300DEB339 /* Experience.rcproject in Sources */,

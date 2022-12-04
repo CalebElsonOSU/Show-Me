@@ -7,6 +7,7 @@
 
 import SwiftUI
 import RealityKit
+import Speech
 
 struct HomeView: View {
     @StateObject var cameraManager = CameraManager()
@@ -73,17 +74,30 @@ struct HomeView: View {
     
     // MARK: - Pull and parse JSON
     func getData() {
+        requestTranscribePermissions()
+        
         guard let path = Bundle.main.path(forResource: "dev.scraped", ofType: "json") else {
             print("json not found")
             return
         }
-        print("path, ", path, path.count)
+        
         let data = try! Data(contentsOf: URL(fileURLWithPath: path), options: .mappedIfSafe)
         let result = try! JSONDecoder().decode([GameData].self, from: data)
         
         // Parse JSON, create currentGame object
         self.currentGame = GameModel(gameData: result)
-        
+    }
+    
+    func requestTranscribePermissions() {
+        SFSpeechRecognizer.requestAuthorization { authStatus in
+            DispatchQueue.main.async {
+                if authStatus == .authorized {
+                    print("Good to go!")
+                } else {
+                    print("Transcription permission was declined.")
+                }
+            }
+        }
     }
 }
 

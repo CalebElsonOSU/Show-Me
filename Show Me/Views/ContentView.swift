@@ -11,11 +11,13 @@ import AVFoundation
 import AVKit
 import TextEntity
 import Combine
+import Speech
 
 class AppModel: ObservableObject {
     let showTimer = PassthroughSubject<Void, Never>()
     let showAnswer = PassthroughSubject<Int?, Never>()
     let resetGame = PassthroughSubject<Void, Never>()
+    let endGame = PassthroughSubject<Void, Never>()
 }
 
 struct ContentView : View {
@@ -27,6 +29,8 @@ struct ContentView : View {
     @State var showGameOver = false
     @State var showAlert = false
     @FocusState private var isTextFieldFocused: Bool
+    @StateObject var speechRecognizer = SpeechRecognizer()
+    @State private var isRecording = false
     var currentFound = 0
     
     var body: some View {
@@ -39,13 +43,29 @@ struct ContentView : View {
                         Spacer()
                         
                         Button(action: {
-                            //Place your action here
                         }) {
                             Image(systemName: "circle.fill")
                                 .font(.system(size: 100))
                                 .foregroundColor(.red)
                                 .padding()
                         }
+                        .simultaneousGesture(
+                            DragGesture(minimumDistance: 0)
+                            // On button hold, begin transcription
+                                .onChanged({ _ in
+                                    currentAnswer = ""
+                                    speechRecognizer.reset()
+                                    speechRecognizer.transcribe()
+                                })
+                            // End transcription on letting go of button
+                                .onEnded({ _ in
+                                    let transcript = speechRecognizer.transcript.lowercased()
+                                    print("transcript: ", transcript)
+                                    currentAnswer = transcript
+                                    checkAnswer(answer: transcript)
+                                    speechRecognizer.stopTranscribing()
+                                })
+                        )
                         .disabled(isTextFieldFocused)
                         .opacity(isTextFieldFocused ? 0 : 1)
                         
@@ -54,21 +74,25 @@ struct ContentView : View {
                                 Text("Enter answer...")
                                     .foregroundColor(.blue)
                             })
-                        .foregroundColor(.white)
-                        .focused($isTextFieldFocused)
-                        .onSubmit {
-                            checkAnswer(answer: String(currentAnswer.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()))
-                            currentAnswer = ""
-                        }
-                        .submitLabel(.done)
-                        .multilineTextAlignment(.center)
-                        .padding()
+                            .foregroundColor(.white)
+                            .focused($isTextFieldFocused)
+                            .onSubmit {
+                                checkAnswer(answer: String(currentAnswer.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()))
+                                currentAnswer = ""
+                            }
+                            .submitLabel(.done)
+                            .multilineTextAlignment(.center)
+                            .padding()
                     }
-
+                    
                 }
             }
             
-            
+            .onAppear {
+                speechRecognizer.reset()
+                speechRecognizer.transcribe()
+                isRecording = true
+            }
             .toolbar{
                 ToolbarItem(placement: .navigationBarLeading, content: {
                     Button(action: {
@@ -108,23 +132,22 @@ struct ContentView : View {
     }
     
     func checkAnswer(answer: String) {
-        let answerNumber = currentGame.currentAnswers.firstIndex(where: { $0.answer == answer })
+        let answerNumber = currentGame.checkAnswer(answer: answer)
         
         model.showAnswer.send(answerNumber)
+        
+        isGameOver()
     }
     
-    func answerFound(score: Int) {
-        currentGame.currentAnswered += 1
-        currentGame.currentScore += score
-        
-        if currentGame.currentAnswered == currentGame.currentAnswers.count {
+    func isGameOver() {
+        if currentGame.isGameOver() && currentGame.isLastGame() {
+            model.endGame.send()
+            // Adds current game score to overall game score
             currentGame.resetCurrentScore()
-            
-            if currentGame.isLastGame() {
-                showGameOver = true
-            } else {
-                model.resetGame.send()
-            }
+            showGameOver = true
+        } else if currentGame.isGameOver() {
+            currentGame.resetCurrentScore()
+            model.resetGame.send()
         }
     }
 }
@@ -134,12 +157,11 @@ extension View {
         when shouldShow: Bool,
         alignment: Alignment = .center,
         @ViewBuilder placeholder: () -> Content) -> some View {
-
-        ZStack(alignment: alignment) {
-            placeholder().opacity(shouldShow ? 1 : 0)
-            self
+            ZStack(alignment: alignment) {
+                placeholder().opacity(shouldShow ? 1 : 0)
+                self
+            }
         }
-    }
 }
 
 struct ARViewContainer: UIViewRepresentable {
@@ -162,9 +184,12 @@ struct ARViewContainer: UIViewRepresentable {
         
         initiateGame(experience: boxAnchor)
         
+        // Various animations for the game boards and host
         let answerBoards = [boxAnchor.answer1!, boxAnchor.answer2!, boxAnchor.answer3!, boxAnchor.answer4!, boxAnchor.answer5!, boxAnchor.answer6!, boxAnchor.answer7!, boxAnchor.answer8!]
         let scoreBoards = [boxAnchor.score1!, boxAnchor.score2!, boxAnchor.score3!, boxAnchor.score4!, boxAnchor.score5!, boxAnchor.score6!, boxAnchor.score7!, boxAnchor.score8!]
         let notifications = [boxAnchor.notifications.showMe1, boxAnchor.notifications.showMe2, boxAnchor.notifications.showMe3, boxAnchor.notifications.showMe4, boxAnchor.notifications.showMe5, boxAnchor.notifications.showMe6, boxAnchor.notifications.showMe7, boxAnchor.notifications.showMe8]
+        let hostRightAnswers = [boxAnchor.notifications.hostRightAnswer]
+        let hostWrongAnswers = [boxAnchor.notifications.hostWrongAnswer]
         
         // MARK: - Combine triggers
         // TODO: Create timer/timer interactions
@@ -175,21 +200,27 @@ struct ARViewContainer: UIViewRepresentable {
         model.showAnswer.sink { answer in
             updateHostBoard(hostBoard: boxAnchor.hostBoard!, correctAnswer: answer != nil)
             
+            // Nil answer is a wrong answer
+            answer != nil ? hostRightAnswers.randomElement()?.post() : hostWrongAnswers.randomElement()?.post()
+            
             if let answerNumber = answer {
                 print("answer number: ", answerNumber)
                 let answerAndScore = currentGame.currentAnswers[answerNumber]
                 
                 updateAnswerAndScore(answerBox: answerBoards[answerNumber], scoreBox: scoreBoards[answerNumber], answer: answerAndScore.answer, score: answerAndScore.score)
-                updateScoreBoard(scoreBoard: boxAnchor.currentScore!, totalScore: answerAndScore.score + currentGame.currentScore)
+                updateScoreBoard(scoreBoard: boxAnchor.currentScore!, totalScore: currentGame.currentScore)
                 notifications[answerNumber].post()
             }
-
         }.store(in: &context.coordinator.subscriptions)
         
         model.resetGame.sink {
             currentGame.nextGame()
             boxAnchor.notifications.resetGame.post()
             updateBoardsData(experience: boxAnchor)
+        }.store(in: &context.coordinator.subscriptions)
+        
+        model.endGame.sink {
+            boxAnchor.notifications.hostGameOver.post()
         }.store(in: &context.coordinator.subscriptions)
         
         updateBoardsData(experience: boxAnchor)
@@ -214,7 +245,10 @@ struct ARViewContainer: UIViewRepresentable {
         hostBoard.children[5].children[0].children[0].components.removeAll()
         hostBoard.children[5].children[0].children[0].children.removeAll()
         
-        let hostText = correctAnswer ? "That's a valid answer, good work!" : "Wrong answer, try again!"
+        let rightAnswers = ["That's a valid answer, good work!", "Correct!", "You're not alone in thinking that", "Points! For you!"]
+        let wrongAnswers = ["Wrong answer, try again!", "That's another strike", "Literally no one said that except you", "No points!"]
+        
+        let hostText = correctAnswer ? rightAnswers.randomElement()! : wrongAnswers.randomElement()!
         
         hostBoard.children[5].children[0].children[0].addChild(TextEntity(text: hostText, color: .white, isMetallic: false))
     }
